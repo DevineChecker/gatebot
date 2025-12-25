@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Lock
 from datetime import date
 
-BOT_TOKEN = "8592451831:AAH2yA98RZ9EZjWMvFlUYPQiYMamNqUxYNs"
+BOT_TOKEN = "8592451831:AAEvVo3CV7FTdkcksE_FNrzGdMTmxV_1m8M"
 ADMIN_IDS = [1614278744]
 VIP_IDS = [1614278744]
 USER_IDS_FILE = 'user_ids.txt'
@@ -535,7 +535,7 @@ def make_report_template(url_or_domain, gateways, checkout, captcha, cloud, cms,
         f"💎 𝗦𝘁𝗮𝘁𝘂𝘀 𝗖𝗼𝗱𝗲: {status_code}\n\n"
         f"⏱️ 𝗧𝗶𝗺𝗲: {elapsed_seconds}s\n"
         f"👤 𝗖𝗵𝗲𝗰𝗸𝗲𝗱 𝗯𝘆: {checked_by}\n\n"
-        "┗━━━━『 --------------------- 』━━━━"
+        "┗━━━━『 --------------- 』━━━━━┛"
     )
     return report
 
