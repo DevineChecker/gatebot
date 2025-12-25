@@ -1,4 +1,12 @@
-import os,re,time,ssl,socket,random,threading,requests,telebot;from urllib.parse import urlparse, quote_plus;from bs4 import BeautifulSoup;from telebot import apihelper;from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton;from concurrent.futures import ThreadPoolExecutor, as_completed;from threading import Lock;from datetime import date
+import os,re,time,ssl,socket,random,threading,requests,telebot
+from urllib.parse import urlparse, quote_plus
+from bs4 import BeautifulSoup
+from telebot import apihelper
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from threading import Lock
+from datetime import date
+
 BOT_TOKEN = "8592451831:AAH2yA98RZ9EZjWMvFlUYPQiYMamNqUxYNs"
 ADMIN_IDS = [1614278744]
 VIP_IDS = [1614278744]
@@ -13,6 +21,8 @@ BOOST_KEYS_FILE = "boost_keys.txt"
 BOOST_REDEEMED_FILE = "boost_redeemed.txt"
 DAILY_EXTRA_FILE = "daily_extra.txt"
 DAILY_USAGE_FILE = "daily_usage.txt"
+PLAN_STICKER_FILE_ID = None  # Add your sticker file ID here
+
 for f in (REGISTERED_FILE, GENERATED_CODES_FILE, PREMIUM_KEYS_FILE, PREMIUM_USERS_FILE, APPROVED_USERS_FILE, SEEN_CHATS_FILE, BOOST_KEYS_FILE, BOOST_REDEEMED_FILE, DAILY_EXTRA_FILE, DAILY_USAGE_FILE):
     if not os.path.exists(f):
         open(f, "a").close()
@@ -21,6 +31,7 @@ FREE_DAILY_LIMIT = 900000
 PREMIUM_DAILY_LIMIT = 200999
 MAX_THREADS_FREE = 89999        
 MAX_THREADS_PREMIUM = 222222   
+
 def is_valid_url(url):
     regex = re.compile(
         r'^(?:http|ftp)s?://'  
@@ -41,7 +52,6 @@ GATEWAY_KEYWORDS = [
     "paystack","flutterwave","skrill","paysera","mercadopago","pagseguro","payu latam","wepay","midtrans","tpv",
     "tpay","payu india","paytabs","myfatoorah","tap","payfort","hyperpay"
 ]
-
 
 GATEWAY_PATTERNS = {
     "paypal": [r"paypal\.com", r"paypalobjects\.com", r"paypal(-checkout)?", r"paypal-sdk"],
@@ -68,8 +78,6 @@ GATEWAY_PATTERNS = {
     "bitpay": [r"bitpay"],
     "amazonpay": [r"amazonpay"],
     "2checkout": [r"2checkout", r"2checkout\.com"]
-    # add more if needed🥲🥸
-    
 }
 
 CMS_PATTERNS = {
@@ -85,14 +93,12 @@ CMS_PATTERNS = {
     'Wix': r'wix(?:\.com|sdk)'
 }
 
-
 CARD_PATTERNS = {
     'Visa': r'visa[^a-z]|cc-visa|vi-?card',
     'Mastercard': r'master[ -]?card',
     'Amex': r'amex|american.?express',
     'Discover': r'discover'
 }
-
 
 def find_payment_gateways_fast(text):
     if not text:
@@ -128,6 +134,7 @@ def find_captcha_details(text):
     if re.search(r'cloudflare.?turnstile', text, flags=re.I):
         detected.append("Cloudflare Turnstile")
     return detected if detected else ["No CAPTCHA detected"]
+
 def find_cloudflare_services(text):
     if not text:
         return ["No Cloudflare detected"]
@@ -265,6 +272,7 @@ def duckduckgo_search_raw(query, max_results=50):
     except Exception:
         pass
     return results
+
 def animate_loading(chat_id, stop_event, text="𝐏𝐫𝐨𝐜𝐞𝐬𝐬𝐢𝐧𝐠 𝐏𝐥𝐞𝐚𝐬𝐞 𝐖𝐚𝐢𝐭"):
     emojis = ["⏳", "🔍", "⚙️", "🎲"]
     try:
@@ -426,9 +434,8 @@ def maybe_notify_admins_quota(uid):
                     pass
     except Exception:
         pass
+
 def is_premium(uid):
-    # مؤقتاً، اعتبر كل المستخدمين غير بريميوم
-    # أو بدّل بـ True لبعض المستخدمين لاحقاً
     return False
 
 def check_and_consume_quota(uid, cost=1):
@@ -447,6 +454,7 @@ def check_and_consume_quota(uid, cost=1):
 
     maybe_notify_admins_quota(uid)
     return True
+
 def main_menu_markup():
     markup = InlineKeyboardMarkup()
     markup.row(
@@ -456,6 +464,7 @@ def main_menu_markup():
     return markup
 
 bot = telebot.TeleBot(BOT_TOKEN, parse_mode=None)  
+
 def check_token_ok():
     try:
         bot.get_me()
@@ -508,9 +517,7 @@ def make_report_template(url_or_domain, gateways, checkout, captcha, cloud, cms,
         "┏━━━━『 Gᴀᴛᴇᴡᴀʏ Rᴇsᴜʟᴛs 』━━━━┓\n\n"
         f"🔗 𝗨𝗥𝗟: {url_or_domain}\n"
         f"💳 𝗚𝗮𝘁𝗲𝘄𝗮𝘆𝘀: {gateways}\n"
-        
         f"🛒 𝗖𝗵𝗲𝗰𝗞𝗢𝘂𝗧: {checkout}\n\n"
-        
         "🛡️𝗦𝗲𝗰𝘂𝗿𝗶𝘁𝘆:\n"
         f"   ├─ 𝗖𝗮𝗽𝘁𝗰𝗵𝗮: {'✅' if 'No CAPTCHA detected' not in captcha else '⛔'}\n"
         f"   ├─ 𝗖𝗹𝗼𝘂𝗱𝗳𝗹𝗮𝗿𝗲: {'✅' if 'No Cloudflare detected' not in cloud else '⛔'}\n"
@@ -526,9 +533,7 @@ def make_report_template(url_or_domain, gateways, checkout, captcha, cloud, cms,
         f"   ├─ 𝗖𝗠𝗦: {cms}\n"
         f"   └─ 𝗖𝗮𝗿𝗱𝘀: {cards}\n\n"
         f"💎 𝗦𝘁𝗮𝘁𝘂𝘀 𝗖𝗼𝗱𝗲: {status_code}\n\n"
-        
         f"⏱️ 𝗧𝗶𝗺𝗲: {elapsed_seconds}s\n"
-        
         f"👤 𝗖𝗵𝗲𝗰𝗸𝗲𝗱 𝗯𝘆: {checked_by}\n\n"
         "┗━━━━『 𝙼𝙰𝙶𝙽𝙴𝚃𝙾 𝙱𝙾𝚃 𝙶𝙰𝚃𝙴 』━━━━"
     )
@@ -563,15 +568,14 @@ def cmd_gate(m):
     plan = "Premium" if is_premium(m.from_user.id) else "Free"
     waiting_card_msg = None
     try:
-        if PLAN_STICKER_FILE_ID = None 
-        
-          try:
+        if PLAN_STICKER_FILE_ID is not None:
+            try:
                 bot.send_sticker(chat, PLAN_STICKER_FILE_ID)
             except Exception:
                 pass
             waiting_card_msg = bot.send_message(chat, f"🔍 𝐒𝐜𝐚𝐧𝐧𝐢𝐧𝐠 𝐏𝐥𝐞𝐚𝐬𝐞 𝐖𝐚𝐢𝐭 `{domain}` (Plan: {plan}) ...")
         else:
-            waiting_card_msg = bot.send_message(chat, f"🔰𝑷𝑳𝑨𝑵 : *{plan}* — 𝐒𝐜𝐚𝐧𝐧𝐢𝐧𝐠 𝐏𝐥𝐞𝐚𝐬𝐞 𝐖𝐚𝐢𝐭 `{domain}`...")
+            waiting_card_msg = bot.send_message(chat, f"🔍 𝐒𝐜𝐚𝐧𝐧𝐢𝐧𝐠 𝐏𝐥𝐞𝐚𝐬𝐞 𝐖𝐚𝐢𝐭 `{domain}` (Plan: {plan}) ...")
 
         stop_event = threading.Event()
         t = threading.Thread(target=animate_loading, args=(chat, stop_event, "Checking"))
@@ -805,7 +809,8 @@ def cmd_checkfile(m):
     bot.register_next_step_handler(m, receive_file_for_check)
 
 def receive_file_for_check(message):
-    chat = message.chat.id; uid = message.from_user.id
+    chat = message.chat.id
+    uid = message.from_user.id
 
     registered = read_lines(REGISTERED_FILE)
     if str(chat) not in registered:
@@ -834,7 +839,9 @@ def receive_file_for_check(message):
             lines = [l.strip() for l in fh if l.strip()]
 
         if not lines:
-            bot.send_message(chat, "❌ Uploaded file is empty."); os.remove(tmp_in); return
+            bot.send_message(chat, "❌ Uploaded file is empty.")
+            os.remove(tmp_in)
+            return
 
         total = len(lines)
         current = get_today_count(uid)
@@ -959,7 +966,8 @@ def cmd_gendork(m):
 
 @bot.message_handler(commands=['broadcast'])
 def cmd_broadcast(m):
-    uid = m.from_user.id; chat = m.chat.id
+    uid = m.from_user.id
+    chat = m.chat.id
     if uid not in ADMIN_IDS:
         bot.send_message(chat, "⛔ Not authorized.")
         return
@@ -984,7 +992,8 @@ def cmd_broadcast(m):
     if not targets:
         bot.send_message(chat, "⚠ No targets to broadcast (no registered or seen chats).")
         return
-    sent = 0; failed = 0
+    sent = 0
+    failed = 0
     for t in targets:
         try:
             bot.send_message(int(t), text)
@@ -997,7 +1006,8 @@ def cmd_broadcast(m):
 
 @bot.message_handler(commands=['stats'])
 def cmd_stats(m):
-    uid = m.from_user.id; chat = m.chat.id
+    uid = m.from_user.id
+    chat = m.chat.id
     if uid not in ADMIN_IDS:
         bot.send_message(chat, "⛔ Not authorized.")
         return
@@ -1009,18 +1019,31 @@ def cmd_start(m):
     chat_id = m.chat.id
     first = m.from_user.first_name or 'User'
     try:
+        # 尝试发送消息
         sent = bot.send_message(chat_id, "🪄")
         mid = sent.message_id
-        time.sleep(0.6); bot.edit_message_text("✨", chat_id, mid)
-        time.sleep(0.6); bot.edit_message_text("👾", chat_id, mid)
-    except Exception:
-        bot.send_message(chat_id, "🪄"); time.sleep(0.8); bot.send_message(chat_id, "✨"); time.sleep(0.8); bot.send_message(chat_id, "👾")
-    bot.send_message(chat_id,
-                     f"┏━━━『 Welcome 』━━━┓\n\n👋 Hello, {first}!\n✨ MAGNETO BOT\n\n⚜️ Use buttons or commands\n┗━━━━━━━━━━━━━━┛",
-                     reply_markup=main_menu_markup())
-    try: mark_seen_chat(chat_id)
-    except: pass
-
+        time.sleep(0.6)
+        bot.edit_message_text("✨", chat_id, mid)
+        time.sleep(0.6)
+        bot.edit_message_text("👾", chat_id, mid)
+    except Exception as e:
+        # 如果发送失败，可能是权限问题
+        print(f"Cannot send message to {chat_id}: {e}")
+        # 不要尝试再次发送，这会导致循环错误
+        return
+    
+    try:
+        bot.send_message(chat_id,
+                         f"┏━━━『 Welcome 』━━━┓\n\n👋 Hello, {first}!\n✨ MAGNETO BOT\n\n⚜️ Use buttons or commands\n┗━━━━━━━━━━━━━━┛",
+                         reply_markup=main_menu_markup())
+    except Exception as e:
+        print(f"Cannot send welcome message to {chat_id}: {e}")
+    
+    try: 
+        mark_seen_chat(chat_id)
+    except: 
+        pass
+        
 @bot.message_handler(commands=['register'])
 def cmd_register(m):
     chat_id = m.chat.id
