@@ -429,7 +429,7 @@ def maybe_notify_admins_quota(uid):
         elif percent >= 1.0:
             for admin in ADMIN_IDS:
                 try:
-                    bot.send_message(admin, f"⛔ User `{uid}` consumed daily quota ({used}/{total_allowed}).")
+                    bot.send_message(admin, f"❌ User `{uid}` consumed daily quota ({used}/{total_allowed}).")
                 except:
                     pass
     except Exception:
@@ -459,7 +459,7 @@ def main_menu_markup():
     markup = InlineKeyboardMarkup()
     markup.row(
         InlineKeyboardButton('𝘊𝘰𝘮𝘮𝘢𝘯𝘥𝘴', callback_data='cmd'),
-        InlineKeyboardButton('𝘊𝘩𝘢𝘯𝘯𝘦𝘭', url='https://t.me/MAGNETOGODFATHER'),
+        InlineKeyboardButton('𝘊𝘩𝘢𝘯𝘯𝘦𝘭', url='https://t.me/YUVRAJSINGHX'),
     )
     return markup
 
@@ -519,8 +519,8 @@ def make_report_template(url_or_domain, gateways, checkout, captcha, cloud, cms,
         f"💳 𝗚𝗮𝘁𝗲𝘄𝗮𝘆𝘀: {gateways}\n"
         f"🛒 𝗖𝗵𝗲𝗰𝗞𝗢𝘂𝗧: {checkout}\n\n"
         "🛡️𝗦𝗲𝗰𝘂𝗿𝗶𝘁𝘆:\n"
-        f"   ├─ 𝗖𝗮𝗽𝘁𝗰𝗵𝗮: {'✅' if 'No CAPTCHA detected' not in captcha else '⛔'}\n"
-        f"   ├─ 𝗖𝗹𝗼𝘂𝗱𝗳𝗹𝗮𝗿𝗲: {'✅' if 'No Cloudflare detected' not in cloud else '⛔'}\n"
+        f"   ├─ 𝗖𝗮𝗽𝘁𝗰𝗵𝗮: {'✅' if 'No CAPTCHA detected' not in captcha else '❌'}\n"
+        f"   ├─ 𝗖𝗹𝗼𝘂𝗱𝗳𝗹𝗮𝗿𝗲: {'✅' if 'No Cloudflare detected' not in cloud else '❌'}\n"
         f"   ├─ 𝗣𝗮𝘆𝗺𝗲𝗻𝘁 𝗦𝗲𝗰𝘂𝗿𝗶𝘁𝘆: {('Both 3D Secure and OTP Required' if (check_3d_secure('') and check_otp_required('')) else ('3D Secure' if check_3d_secure('') else ('OTP Required' if check_otp_required('') else '2D (No extra security)')) )}\n"
         f"   └─ 𝗚𝗿𝗮𝗽𝗵𝗤𝗟: {graphql}\n\n"
         "🔐 𝗗𝗲𝘁𝗮𝗶𝗹𝘀:\n"
@@ -535,7 +535,7 @@ def make_report_template(url_or_domain, gateways, checkout, captcha, cloud, cms,
         f"💎 𝗦𝘁𝗮𝘁𝘂𝘀 𝗖𝗼𝗱𝗲: {status_code}\n\n"
         f"⏱️ 𝗧𝗶𝗺𝗲: {elapsed_seconds}s\n"
         f"👤 𝗖𝗵𝗲𝗰𝗸𝗲𝗱 𝗯𝘆: {checked_by}\n\n"
-        "┗━━━━『 𝙼𝙰𝙶𝙽𝙴𝚃𝙾 𝙱𝙾𝚃 𝙶𝙰𝚃𝙴 』━━━━"
+        "┗━━━━『 --------------------- 』━━━━"
     )
     return report
 
@@ -562,7 +562,7 @@ def cmd_gate(m):
     if not check_and_consume_quota(m.from_user.id, cost=1):
         base_limit = PREMIUM_DAILY_LIMIT if is_premium(m.from_user.id) else FREE_DAILY_LIMIT
         extra = get_extra(m.from_user.id)
-        bot.send_message(chat, f"⛔ Not enough daily quota. Used {get_today_count(m.from_user.id)}/{base_limit+extra} today.")
+        bot.send_message(chat, f"❌ Not enough daily quota. Used {get_today_count(m.from_user.id)}/{base_limit+extra} today.")
         return
 
     plan = "Premium" if is_premium(m.from_user.id) else "Free"
@@ -604,11 +604,11 @@ def cmd_gate(m):
         ] if x]) or "No checkout details detected"
         cms = ", ".join(detect_cms(content))
         cards = ", ".join(detect_payment_cards(content))
-        graphql = '✅' if re.search(r'graphql|__schema', content, flags=re.I) else '⛔'
+        graphql = '✅' if re.search(r'graphql|__schema', content, flags=re.I) else '❌'
         ssl_info = check_ssl(domain)
         ssl_issuer = ssl_info['issuer'].get('O') if ssl_info and ssl_info.get('issuer') and ssl_info['issuer'].get('O') else (ssl_info['issuer'].get('CN') if ssl_info and ssl_info.get('issuer') and ssl_info['issuer'].get('CN') else 'Unknown') if ssl_info else 'Invalid SSL'
         ssl_subject = ssl_info['subject'].get('CN') if ssl_info and ssl_info.get('subject') and ssl_info['subject'].get('CN') else 'Unknown' if ssl_info else 'Invalid SSL'
-        ssl_valid = '✅' if ssl_info else '⛔'
+        ssl_valid = '✅' if ssl_info else '❌'
         is_3d = check_3d_secure(content)
         is_otp = check_otp_required(content)
         payment_security_type = (
@@ -679,7 +679,7 @@ def cmd_mgate(m):
     if not check_and_consume_quota(m.from_user.id, cost=total_cost):
         base_limit = PREMIUM_DAILY_LIMIT if is_premium(m.from_user.id) else FREE_DAILY_LIMIT
         extra = get_extra(m.from_user.id)
-        bot.send_message(chat, f"⛔ Not enough daily quota to scan {len(targets)} targets. Used {get_today_count(m.from_user.id)}/{base_limit+extra} today.")
+        bot.send_message(chat, f"❌ Not enough daily quota to scan {len(targets)} targets. Used {get_today_count(m.from_user.id)}/{base_limit+extra} today.")
         return
 
     for host in targets:
@@ -714,9 +714,9 @@ def cmd_mgate(m):
         ] if x]) or "No checkout details detected"
         cms = ", ".join(detect_cms(content))
         cards = ", ".join(detect_payment_cards(content))
-        graphql = '✅' if re.search(r'graphql|__schema', content, flags=re.I) else '⛔'
+        graphql = '✅' if re.search(r'graphql|__schema', content, flags=re.I) else '❌'
         
-        ssl_valid = '✅' if headers and ('Strict-Transport-Security' in headers or 'https' in headers.get('Location','').lower() or "https://" in urlparse("http://"+host).scheme) else '⛔'
+        ssl_valid = '✅' if headers and ('Strict-Transport-Security' in headers or 'https' in headers.get('Location','').lower() or "https://" in urlparse("http://"+host).scheme) else '❌'
         ssl_issuer = 'Unknown'
         ssl_subject = 'Unknown'
         cvv_cvc_status = check_payment_info(content)
@@ -773,7 +773,7 @@ def scan_target(session, raw, uid):
         ] if x]) or "No checkout details detected"
         cms = ", ".join(detect_cms(content))
         cards = ", ".join(detect_payment_cards(content))
-        ssl_hint = '✅' if (headers and (headers.get('Strict-Transport-Security') or r.url.startswith('https'))) else '⛔'
+        ssl_hint = '✅' if (headers and (headers.get('Strict-Transport-Security') or r.url.startswith('https'))) else '❌'
         ssl_issuer = headers.get('Server', 'Unknown') if headers else 'Unknown'
         ssl_subject = 'Unknown'
         block = (
@@ -782,10 +782,10 @@ def scan_target(session, raw, uid):
             f"💳 𝗚𝗮𝘁𝗲𝘄𝗮𝘆𝘀: {gateways}\n"
             f"🛒 𝗖𝗵𝗲𝗰𝗞𝗢𝘂𝗧: {checkout}\n\n"
             f"🛡️𝗦𝗲𝗰𝘂𝗿𝗶𝘁𝘆:\n"
-            f"   ├─ 𝗖𝗮𝗽𝘁𝗰𝗵𝗮: {'✅' if 'No CAPTCHA detected' not in captcha else '⛔'}\n"
-            f"   ├─ 𝗖𝗹𝗼𝘂𝗱𝗳𝗹𝗮𝗿𝗲: {'✅' if 'No Cloudflare detected' not in cloud else '⛔'}\n"
+            f"   ├─ 𝗖𝗮𝗽𝘁𝗰𝗵𝗮: {'✅' if 'No CAPTCHA detected' not in captcha else '❌'}\n"
+            f"   ├─ 𝗖𝗹𝗼𝘂𝗱𝗳𝗹𝗮𝗿𝗲: {'✅' if 'No Cloudflare detected' not in cloud else '❌'}\n"
             f"   ├─ 𝗣𝗮𝘆𝗺𝗲𝗻𝘁 𝗦𝗲𝗰𝘂𝗿𝗶𝘁𝘆: {'3D/OTP/2D (fast)'}\n"
-            f"   └─ 𝗚𝗿𝗮𝗽𝗵𝗤𝗟: {'✅' if re.search(r'graphql|__schema', content, flags=re.I) else '⛔'}\n\n"
+            f"   └─ 𝗚𝗿𝗮𝗽𝗵𝗤𝗟: {'✅' if re.search(r'graphql|__schema', content, flags=re.I) else '❌'}\n\n"
             f"🔐 𝗗𝗲𝘁𝗮𝗶𝗹𝘀:\n"
             f"   ├─ 𝗩𝗮𝗹𝗶𝗱: {ssl_hint}\n"
             f"   ├─ 𝗜𝘀𝘀𝘂𝗲𝗿: {ssl_issuer}\n"
@@ -850,7 +850,7 @@ def receive_file_for_check(message):
         total_allowed = base_limit + extra
         if current + total > total_allowed:
             bot.send_message(chat,
-                             f"⛔ Daily limit exceeded. You've used {current}/{total_allowed} today.\n"
+                             f"❌ Daily limit exceeded. You've used {current}/{total_allowed} today.\n"
                              f"Trying to scan {total} targets would exceed your limit.")
             try: os.remove(tmp_in)
             except: pass
@@ -947,8 +947,8 @@ def cmd_gendork(m):
         ] if x]) or "No checkout details detected"
         cms = ", ".join(detect_cms(content))
         cards = ", ".join(detect_payment_cards(content))
-        graphql = '✅' if re.search(r'graphql|__schema', content, flags=re.I) else '⛔'
-        ssl_hint = '✅' if (headers and (headers.get('Strict-Transport-Security') or first.startswith('https'))) else '⛔'
+        graphql = '✅' if re.search(r'graphql|__schema', content, flags=re.I) else '❌'
+        ssl_hint = '✅' if (headers and (headers.get('Strict-Transport-Security') or first.startswith('https'))) else '❌'
         cvv_cvc_status = check_payment_info(content)
         inbuilt_status = "Yes" if check_inbuilt_payment_system(content) else "No"
         checked_by = f"[Req](tg://user?id={m.from_user.id})"
@@ -969,7 +969,7 @@ def cmd_broadcast(m):
     uid = m.from_user.id
     chat = m.chat.id
     if uid not in ADMIN_IDS:
-        bot.send_message(chat, "⛔ Not authorized.")
+        bot.send_message(chat, "❌ Not authorized.")
         return
     parts = m.text.split(' ', 1)
     if len(parts) != 2:
@@ -1009,7 +1009,7 @@ def cmd_stats(m):
     uid = m.from_user.id
     chat = m.chat.id
     if uid not in ADMIN_IDS:
-        bot.send_message(chat, "⛔ Not authorized.")
+        bot.send_message(chat, "❌ Not authorized.")
         return
     total = len(read_lines(REGISTERED_FILE))
     bot.send_message(chat, f"📊 Total registered chats: `{total}`")
