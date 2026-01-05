@@ -477,7 +477,7 @@ if not check_token_ok():
     print("ERROR: Bot token invalid or network problem. Make sure BOT_TOKEN is correct.")
 else:
     print("Bot token OK. Starting...")
-    print("Magneto Bot starting (patterns-enhanced)...")
+    print("Gate Bot starting (patterns-enhanced)...")
 
 @bot.callback_query_handler(func=lambda call: True)
 def handle_callback(call):
